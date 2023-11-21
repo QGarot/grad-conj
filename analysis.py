@@ -34,9 +34,15 @@ def multi_display_k(params: list[int], n: int) -> None:
 
         nb_points = len(x)
         delta = 1 / (nb_points - 1)
-        plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="--", marker=".", label="k = " + str(k))
+        plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="k = " + str(k))
 
     plt.legend()
     plt.title("Solutions du système linéaire Ax = b en fonction du paramètre k")
     plt.grid(True)
+    plt.xlabel("x")
+    plt.ylabel("u(x)")
     plt.show()
+
+
+def compare_convergence() -> None:
+    pass
