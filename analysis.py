@@ -56,6 +56,27 @@ def multi_display_k(params: list[int], n: int) -> None:
     plt.show()
 
 
+def compare_convergence_ssor(A: np.array, b: np.array, params: list[float]) -> None:
+    """
+    Affiche sur un même graphique les convergences de la méthode du gradient conjugué préconditionné (SSOR) en fonction
+    du paramètre w. Tests effectués avec une bonne précision.
+    :param A: matrice carrée symétrique définie positive
+    :param b: second membre
+    :param params: liste contenant les paramètres w à tester
+    :return:
+    """
+    for w in params:
+        indices, margins_of_error = functions.conjugate_gradient_method_ssor(A, b, 1e-5, 100, w, False, True)[1]
+        plt.plot(indices, margins_of_error, ls="-", marker=".", label="w = " + str(w))
+
+    plt.grid(True)
+    plt.legend()
+    plt.title("Comparaison convergence en fonction du paramètre w")
+    plt.xlabel("k")
+    plt.ylabel("|| Ax_k - b ||")
+    plt.show()
+
+
 def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bool, debug: bool = False) -> None:
     """
     Affiche sur un même graphique les convergences de la méthode du gradient conjugué SANS et AVEC préconditionnement
