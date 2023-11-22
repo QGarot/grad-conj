@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from math import sqrt
+from typing import Union
 
 
-def display_function(u: np.array, opt: str = "--", debug: bool = False) -> None:
+def display_function(u: np.array, debug: bool = False) -> None:
     """
-    Affiche le graphe de la fonction dont les valeurs sont stockées dans le vecteur u
-    :param debug:
+    Affiche le graphe de la fonction dont les valeurs "discrètes" sont stockées dans le vecteur u
     :param u:
-    :param opt:
+    :param debug:
     :return:
     """
     nb_points = len(u)
@@ -17,7 +17,7 @@ def display_function(u: np.array, opt: str = "--", debug: bool = False) -> None:
     # Abscisse
     # (Le vecteurs u contient nb_points composantes. L'abscisse doit alors être composé de nb_points points (x_i),
     # de façon à afficher les points de coordonnées (x_i, u_i)).
-    x = [(i-1) * delta for i in range(1, nb_points+1)]
+    x = [(i - 1) * delta for i in range(1, nb_points + 1)]
 
     # Ordonnée
     y = u
@@ -29,7 +29,7 @@ def display_function(u: np.array, opt: str = "--", debug: bool = False) -> None:
         print("------------------------------------------")
 
     # Affichage
-    plt.plot(x, y, ls=opt, marker=".")
+    plt.plot(x, y, ls="-", marker=".")
     plt.grid(True)
     plt.title("Graphe de la fonction u")
     plt.xlabel("x")
@@ -37,24 +37,35 @@ def display_function(u: np.array, opt: str = "--", debug: bool = False) -> None:
     plt.show()
 
 
-def conjugate_gradient_method(A: np.array, b: np.array, eps: float, conditional_loop_param: int, debug: bool = False) -> np.array:
+def conjugate_gradient_method(A: np.array, b: np.array, eps: float, kmax: int, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list[list, list]]]:
     """
-    TODO: faire la version conditionnelle
-    Résout le système linéaire Ax = b avec la méthode du gradient conjugué
-    Utilité d'une boucle inconditionnelle : étudier la vitesse de convergence de la méthode
-    :param A: matrice carrée
-    :param b:
-    :param conditional_loop_param: entier correspondant au nombre maximal de tour de boucle à effectuer.
-    :param debug:
+    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué.
+    Utilité de l'usage d'une boucle inconditionnelle : étudier la vitesse de convergence de la méthode.
+    :param A: matrice carrée symétrique définie positive
+    :param b: second membre
     :param eps: précision
+    :param kmax: entier correspondant au nombre maximal de tour de boucle à effectuer
+    :param debug:
+    :param convergence:
+    Si ce paramètre vaut True, la fonction retourne la solution ET les informations permettant
+    d'étudier la convergence de la méthode, à savoir :
+        - une liste contenant les indices de chaque étape (tours de boucle
+        - une liste contenant || Ax_k - b ||, où x_k est l'approximation de la solution du système linéaire à la k-ème
+        étape. Plus cette valeur est proche de 0, plus x_k est proche de la solution exacte.
     :return x: solution du système linéaire avec conditions aux bords
     """
+    n = np.shape(A)[0]
 
     # Initialisation
-    n = np.shape(A)[0]
     x = np.zeros(n)
     r = b - np.matmul(A, x)
     p = r
+
+    # Initialisation des paramètres pour étudier la convergence
+    # liste des indices
+    indices = []
+    # liste des marges d'erreur, c'est à dire des || Ax_k - b ||
+    margins_of_error = []
 
     if debug:
         print("----------- Gradient conjugué  -----------")
@@ -64,23 +75,26 @@ def conjugate_gradient_method(A: np.array, b: np.array, eps: float, conditional_
         print(">> p = \n", p)
         print("")
 
-    if conditional_loop_param != -1:
-        kmax = conditional_loop_param
-        for k in range(kmax):
-            alpha = np.matmul(np.transpose(r), r) / np.matmul(np.matmul(np.transpose(p), A), p)
-            x = x + alpha * p
-            rk = r
-            r = rk - alpha * np.matmul(A, p)
+    for k in range(kmax):
+        alpha = np.matmul(np.transpose(r), r) / np.matmul(np.matmul(np.transpose(p), A), p)
+        x = x + alpha * p
+        rk = r
+        r = rk - alpha * np.matmul(A, p)
+        res = np.linalg.norm(np.matmul(A, x) - b)
 
-            if np.linalg.norm(r) <= eps:
-                break
-            beta = np.matmul(np.transpose(r), r) / np.matmul(np.transpose(rk), rk)
-            p = r + beta * p
-            if debug:
-                print("k = ", k)
-                print(">>  Distance à la solution = ", np.linalg.norm(np.matmul(A, x) - b))
-    else:
-        pass
+        if convergence:
+            indices.append(k)
+            margins_of_error.append(res)
+
+        if np.linalg.norm(r) <= eps:
+            break
+
+        beta = np.matmul(np.transpose(r), r) / np.matmul(np.transpose(rk), rk)
+        p = r + beta * p
+
+        if debug:
+            print("k = ", k)
+            print(">>  Distance à la solution = ", np.linalg.norm(np.matmul(A, x) - b))
 
     # Vérification
     if debug:
@@ -95,37 +109,40 @@ def conjugate_gradient_method(A: np.array, b: np.array, eps: float, conditional_
     x = np.insert(x, 0, 1)
     x = np.append(x, 0.0)
 
-    return x
+    # Si on veut étudier la convergence, on retourne les données nécessaires pour afficher le graphe de || Ax_k - b ||
+    # en fonction de k
+    if convergence:
+        return [x, [indices, margins_of_error]]
+    else:
+        return x
 
 
 def define_linear_system(n: int, k: float, debug: bool = False) -> tuple[np.array, np.array]:
     """
     Retourne le système linéaire associé à la résolution de l'équation différentielle : ...
-    :param debug: Vrai si on affiche les matrices, faux sinon
-    :param k: paramètre réel du système
     :param n: dimension du système
+    :param k: paramètre réel du système
+    :param debug:
     :return:
     """
     # Initialisation de la matrice (n*n) A, la matrice colonne (n*1) b et du paramètre h
     A = np.zeros((n, n))
     b = np.zeros(n)
-    h = 1 / (n+1)
+    h = 1 / (n + 1)
 
     # Remplissage des matrices A et b
     for i in range(n):
         if i == 0:
             A[0, 0] = k + 2 / (h ** 2)
             A[0, 1] = - 1 / (h ** 2)
-            b[0] = 1 / (h ** 2)  # - 10
+            b[0] = 1 / (h ** 2)
         elif i == n - 1:
             A[n - 1, n - 1] = k + 2 / (h ** 2)
             A[n - 1, n - 2] = - 1 / (h ** 2)
-            # b[i] = - 10
         else:
             A[i, i - 1] = - 1 / (h ** 2)
             A[i, i] = k + 2 / (h ** 2)
             A[i, i + 1] = - 1 / (h ** 2)
-            # b[i] = - 10
 
     if debug:
         print("------ Définition du système Ax = b ------")
@@ -136,10 +153,9 @@ def define_linear_system(n: int, k: float, debug: bool = False) -> tuple[np.arra
     return A, b
 
 
-def get_lower(A: np.array) -> np.array:
+def get_lower_strict(A: np.array) -> np.array:
     """
-    Retourne la matrice ne contenant que la partie triangulaire inférieure de la matrice A
-    :param strict:
+    Retourne la matrice ne contenant que la partie triangulaire inférieure STRICTE de la matrice A
     :param A:
     :return:
     """
@@ -153,10 +169,9 @@ def get_lower(A: np.array) -> np.array:
     return L
 
 
-def get_upper(A: np.array) -> np.array:
+def get_upper_strict(A: np.array) -> np.array:
     """
-    Retourne la matrice ne contenant que la partie triangulaire supérieure de la matrice A
-    :param strict:
+    Retourne la matrice ne contenant que la partie triangulaire supérieure STRICTE de la matrice A
     :param A:
     :return:
     """
@@ -216,26 +231,41 @@ def inv_lower_triangular(T: np.array) -> np.array:
     return TM1
 
 
-def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, conditional_loop_param: int, w: float, debug: bool = False) -> np.array:
+def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
     """
-    Résout le système linéaire Ax = b avec la méthode du gradient conjugué, en utilisant le préconditionneur SSOR
-    :param A:
-    :param b:
-    :param eps:
-    :param conditional_loop_param:
-    :param w:
+    TODO: pas besoin de passer par le calcul direct de l'inverse du préconditionneur.
+    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement
+    SSOR.
+    :param A: matrice carrée symétrique définie positive
+    :param b: second membre
+    :param eps: précision
+    :param kmax: entier correspondant au nombre maximal de tours de boucle
+    :param w: paramètrage SSOR
     :param debug:
+    :param convergence:
+    Si ce paramètre vaut True, la fonction retourne la solution ET les informations permettant
+    d'étudier la convergence de la méthode, à savoir :
+        - une liste contenant les indices de chaque étape (tours de boucle
+        - une liste contenant || Ax_k - b ||, où x_k est l'approximation de la solution du système linéaire à la k-ème
+        étape. Plus cette valeur est proche de 0, plus x_k est proche de la solution exacte.
+    :return x: solution du système linéaire avec conditions aux bords
     :return:
     """
-
-    # Initialisation
+    # Initialisation des variables nécessaires pour calculer l'inverse du préconditionneur
+    n = np.shape(A)[0]
     D = get_diagonal(A)
-    E = - get_lower(A)
-    T = (1 / sqrt(w * (2 - w))) * (D - w * E) * np.sqrt(D)
+    DM12 = np.zeros((n, n))
+
+    for i in range(n):
+        DM12[i, i] = 1 / sqrt(D[i, i])
+
+    E = - get_lower_strict(A)
+    T = (1 / sqrt(w * (2 - w))) * (D - w * E) * DM12
     T_inv = inv_lower_triangular(T)
     T_transpose_inv = np.linalg.inv(np.transpose(T))
+
+    # Calcul de l'inverse du préconditionneur
     prec = np.matmul(T_transpose_inv, T_inv)
 
     # Résolution du système : P^-1 * A *x = P^-1 * b
-    z = conjugate_gradient_method(np.matmul(prec, A), np.matmul(prec, b), eps, conditional_loop_param, debug)
-    return z
+    return conjugate_gradient_method(np.matmul(prec, A), np.matmul(prec, b), eps, kmax, debug, convergence)
