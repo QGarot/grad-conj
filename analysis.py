@@ -56,13 +56,14 @@ def multi_display_k(params: list[int], n: int) -> None:
     plt.show()
 
 
-def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, debug: bool = False) -> None:
+def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bool, debug: bool = False) -> None:
     """
     Affiche sur un même graphique les convergences de la méthode du gradient conjugué SANS et AVEC préconditionnement
     :param A: matrice carrée symétrique définie positive
     :param b: second membre
     :param eps: précision
     :param kmax: nombre de tours de boucle maximal à effectuer lors des deux appels
+    :param log: vaut True si on affiche le log10 des marges d'erreur
     :param debug:
     :return:
     """
@@ -77,8 +78,13 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, debug: 
         print(">> indices_ssor = ", indices_ssor)
         print(">> margins_of_error_ssor = ", margins_of_error_ssor)
 
-    plt.plot(indices, margins_of_error, ls="-", marker=".", label="Sans SSOR")
-    plt.plot(indices_ssor, margins_of_error_ssor, ls="-", marker=".", label="Avec SSOR")
+    if log:
+        plt.plot(indices, np.log10(margins_of_error), ls="-", marker=".", label="Sans SSOR")
+        plt.plot(indices_ssor, np.log10(margins_of_error_ssor), ls="-", marker=".", label="Avec SSOR")
+    else:
+        plt.plot(indices, margins_of_error, ls="-", marker=".", label="Sans SSOR")
+        plt.plot(indices_ssor, margins_of_error_ssor, ls="-", marker=".", label="Avec SSOR")
+
     plt.grid(True)
     plt.legend()
     plt.title("Comparaison convergence")

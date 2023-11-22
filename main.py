@@ -18,4 +18,4 @@ if __name__ == "__main__":
     #DM1 = np.zeros((np.shape(A)[0], np.shape(A)[0]))
     #for i in range(np.shape(A)[0]):
     #    DM1[i, i] = 1 / D[i, i]
-    analysis.compare_convergence(A, b, 1e-2, 1000, True)
+    analysis.compare_convergence(A, b, 1e-1, 50, True, True)
