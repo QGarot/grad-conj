@@ -31,9 +31,9 @@ def display_function(u: np.array, debug: bool = False) -> None:
     # Affichage
     plt.plot(x, y, ls="-", marker=".")
     plt.grid(True)
-    plt.title("Graphe de la fonction u")
-    plt.xlabel("x")
-    plt.ylabel("u(x)")
+    plt.title("Graphe de la fonction $u$")
+    plt.xlabel("$x$")
+    plt.ylabel("$u(x)$")
     plt.show()
 
 

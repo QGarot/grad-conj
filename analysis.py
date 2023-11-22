@@ -23,10 +23,10 @@ def multi_display_dimensions(dimensions: list[int], k: int) -> None:
         plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="n = " + str(dim))
 
     plt.legend()
-    plt.title("Solutions du système linéaire Ax = b en fonction de sa dimension")
+    plt.title("Solutions du système linéaire $Ax_k - b$ en fonction de sa dimension ($k$ fixé à " + str(k) + ")")
     plt.grid(True)
-    plt.xlabel("x")
-    plt.ylabel("u(x)")
+    plt.xlabel("$x$")
+    plt.ylabel("$u(x)$")
     plt.show()
 
 
@@ -42,17 +42,17 @@ def multi_display_k(params: list[int], n: int) -> None:
     """
     for k in params:
         A, b = functions.define_linear_system(n, k)
-        x = functions.conjugate_gradient_method(A, b, 0.001, 50)
+        x = functions.conjugate_gradient_method(A, b, 1e-9, 100)
 
         nb_points = len(x)
         delta = 1 / (nb_points - 1)
         plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="k = " + str(k))
 
     plt.legend()
-    plt.title("Solutions du système linéaire Ax = b en fonction du paramètre k")
+    plt.title("Solutions du système linéaire $Ax = b$ en fonction du paramètre $k$ ($n = " + str(n) + "$)")
     plt.grid(True)
-    plt.xlabel("x")
-    plt.ylabel("u(x)")
+    plt.xlabel("$x$")
+    plt.ylabel("$u(x)$")
     plt.show()
 
 
@@ -71,9 +71,9 @@ def compare_convergence_ssor(A: np.array, b: np.array, params: list[float]) -> N
 
     plt.grid(True)
     plt.legend()
-    plt.title("Comparaison convergence en fonction du paramètre w")
-    plt.xlabel("k")
-    plt.ylabel("|| Ax_k - b ||")
+    plt.title("Comparaison convergence en fonction du paramètre $w$")
+    plt.xlabel("$k$")
+    plt.ylabel("$\Vert Ax_k - b \Vert$")
     plt.show()
 
 
@@ -109,6 +109,6 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bo
     plt.grid(True)
     plt.legend()
     plt.title("Comparaison convergence")
-    plt.xlabel("k")
-    plt.ylabel("|| Ax_k - b ||")
+    plt.xlabel("$k$")
+    plt.ylabel("$\Vert Ax_k - b \Vert$")
     plt.show()
