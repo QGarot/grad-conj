@@ -23,7 +23,7 @@ def multi_display_dimensions(dimensions: list[int], k: int) -> None:
         plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="n = " + str(dim))
 
     plt.legend()
-    plt.title("Solutions du système linéaire $Ax_k - b$ en fonction de sa dimension ($k$ fixé à " + str(k) + ")")
+    plt.title("Solutions du système linéaire $Ax - b$ en fonction de sa dimension ($k$ fixé à " + str(k) + ")")
     plt.grid(True)
     plt.xlabel("$x$")
     plt.ylabel("$u(x)$")
@@ -110,5 +110,9 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bo
     plt.legend()
     plt.title("Comparaison convergence")
     plt.xlabel("$k$")
-    plt.ylabel("$\Vert Ax_k - b \Vert$")
+    if log:
+        plt.ylabel("$log_{10}(\Vert Ax_k - b \Vert)$")
+    else:
+        plt.ylabel("$\Vert Ax_k - b \Vert$")
+
     plt.show()
