@@ -23,7 +23,8 @@ def multi_display_dimensions(dimensions: list[int], k: int) -> None:
         plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="n = " + str(dim))
 
     plt.legend()
-    plt.title("Solutions du système linéaire $Ax - b$ en fonction de sa dimension ($k$ fixé à " + str(k) + ")")
+    # Titre affiché dans le rapport
+    #plt.title("Solutions du système linéaire $Ax - b$ en fonction de sa dimension ($k$ fixé à " + str(k) + ")")
     plt.grid(True)
     plt.xlabel("$x$")
     plt.ylabel("$u(x)$")
@@ -49,17 +50,18 @@ def multi_display_k(params: list[int], n: int) -> None:
         plt.plot([(i-1) * delta for i in range(1, nb_points+1)], x, ls="-", marker=".", label="k = " + str(k))
 
     plt.legend()
-    plt.title("Solutions du système linéaire $Ax = b$ en fonction du paramètre $k$ ($n = " + str(n) + "$)")
+    # Titre affiché dans le rapport
+    #plt.title("Solutions du système linéaire $Ax = b$ en fonction du paramètre $k$ ($n = " + str(n) + "$)")
     plt.grid(True)
     plt.xlabel("$x$")
     plt.ylabel("$u(x)$")
     plt.show()
 
 
-def compare_convergence_ssor(A: np.array, b: np.array, params: list[float]) -> None:
+def compare_convergence_ssor_w(A: np.array, b: np.array, params: list[float]) -> None:
     """
     Affiche sur un même graphique les convergences de la méthode du gradient conjugué préconditionné (SSOR) en fonction
-    du paramètre w. Tests effectués avec une bonne précision.
+    de son paramètre w. Tests effectués avec une bonne précision.
     :param A: matrice carrée symétrique définie positive
     :param b: second membre
     :param params: liste contenant les paramètres w à tester
@@ -71,7 +73,8 @@ def compare_convergence_ssor(A: np.array, b: np.array, params: list[float]) -> N
 
     plt.grid(True)
     plt.legend()
-    plt.title("Comparaison convergence en fonction du paramètre $w$")
+    # Titre affiché dans le rapport
+    #plt.title("Comparaison des convergences de la méthode du\n gradient conjugué préconditionné (SSOR) en fonction de $w$\n")
     plt.xlabel("$k$")
     plt.ylabel("$\Vert Ax_k - b \Vert$")
     plt.show()
@@ -108,7 +111,9 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bo
 
     plt.grid(True)
     plt.legend()
-    plt.title("Comparaison convergence")
+    # Titre affiché sur le rapport...
+    #plt.title("Comparaison de la convergence de la méthode du gradient conjugué sans préconditionnement avec celle
+    # de la méthode du gradient avec préconditionnement \n")
     plt.xlabel("$k$")
     if log:
         plt.ylabel("$log_{10}(\Vert Ax_k - b \Vert)$")

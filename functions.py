@@ -146,8 +146,8 @@ def define_linear_system(n: int, k: float, debug: bool = False) -> tuple[np.arra
 
     if debug:
         print("------ Définition du système Ax = b ------")
-        print(">> A = \n", A)
-        print(">> b = \n", b)
+        print(">> A =\n", A)
+        print(">> b =\n", b)
         print("------------------------------------------")
 
     return A, b
@@ -230,39 +230,55 @@ def inv_lower_triangular(T: np.array) -> np.array:
             TM1[l, c] = (1 / T[l, l]) * (kronecker(l, c) - sum)
     return TM1
 
+
 def solve_lower(L: np.array, b: np.array) -> np.array:
+    """
+    Retourne la solution du système linéaire Lx = b
+    :param L: matrice triangulaire inférieure inversible
+    :param b: second membre
+    :return:
+    """
     n = np.shape(L)[0]
     x = np.zeros(n)
 
     for i in range(n):
         x[i] = b[i]
         for j in range(i):
-            x[i] = x[i] - L[i,j]*x[j]
-        x[i] = x[i] / L[i,i]
+            x[i] = x[i] - L[i, j] * x[j]
+        x[i] = x[i] / L[i, i]
     
     return x
 
+
 def solve_upper(U: np.array, b: np.array) -> np.array:
+    """
+    Retourne la solution du système linéaire Ux = b
+    :param U: matrice triangulaire supérieure inversible
+    :param b: second membre
+    :return:
+    """
     n = np.shape(U)[0]
     x = np.zeros(n)
 
-    for i in range(n-1, -1, -1):
+    for i in range(n - 1, -1, -1):
         x[i] = b[i]
-        for j in range(i+1, n):
-            x[i] -= U[i, j]*x[j]
-        x[i] /= U[i, i]
+        for j in range(i + 1, n):
+            x[i] = x[i] - U[i, j] * x[j]
+        x[i] = x[i] / U[i, i]
     
     return x
 
 
 def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
     """
-    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement SSOR
+    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement
+    SSOR
     Utilité de l'usage d'une boucle inconditionnelle : étudier la vitesse de convergence de la méthode.
     :param A: matrice carrée symétrique définie positive
     :param b: second membre
     :param eps: précision
     :param kmax: entier correspondant au nombre maximal de tour de boucle à effectuer
+    :param w: paramètre du préconditionneur SSOR
     :param debug:
     :param convergence:
     Si ce paramètre vaut True, la fonction retourne la solution ET les informations permettant
@@ -278,7 +294,7 @@ def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax
     x = np.zeros(n)
     r = b - np.matmul(A, x)
 
-    # Modification pour SSOR
+    # (Modifications pour SSOR)
     D = get_diagonal(A)
     DM12 = np.zeros((n, n))
 
@@ -321,9 +337,8 @@ def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax
 
         if np.linalg.norm(r) <= eps:
             break
-
         
-        # Modification pour SSOR
+        # (Modification pour SSOR)
         zk = z
         y = solve_lower(T, r)
         z = solve_upper(T_transpose, y)
