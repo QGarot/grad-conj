@@ -169,22 +169,6 @@ def get_lower_strict(A: np.array) -> np.array:
     return L
 
 
-def get_upper_strict(A: np.array) -> np.array:
-    """
-    Retourne la matrice ne contenant que la partie triangulaire supérieure STRICTE de la matrice A
-    :param A:
-    :return:
-    """
-    n = np.shape(A)[0]
-    U = np.zeros((n, n))
-
-    for i in range(n):
-        for j in range(i + 1, n):
-            U[i, j] = A[i, j]
-
-    return U
-
-
 def get_diagonal(A: np.array) -> np.array:
     """
     Retourne la matrice ne contenant que la partie diagonale de la matrice A
@@ -198,37 +182,6 @@ def get_diagonal(A: np.array) -> np.array:
         D[i, i] = A[i, i]
 
     return D
-
-
-def kronecker(i: int, j: int) -> int:
-    """
-    Symbole delta de Kronecker
-    :param i:
-    :param j:
-    :return:
-    """
-    if i == j:
-        return 1
-    else:
-        return 0
-
-
-def inv_lower_triangular(T: np.array) -> np.array:
-    """
-    TODO: inv_upper_triangular
-    Retourne l'inverse d'une matrice triangulaire inversible
-    :param T:
-    :return:
-    """
-    n = np.shape(T)[0]
-    TM1 = np.zeros((n, n))
-    for l in range(n):
-        for c in range(l + 1):
-            sum = 0
-            for k in range(c, l + 1):
-                sum = sum + T[l, k] * TM1[k, c]
-            TM1[l, c] = (1 / T[l, l]) * (kronecker(l, c) - sum)
-    return TM1
 
 
 def solve_lower(L: np.array, b: np.array) -> np.array:
@@ -269,7 +222,7 @@ def solve_upper(U: np.array, b: np.array) -> np.array:
     return x
 
 
-def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
+def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
     """
     Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement
     SSOR
@@ -369,43 +322,3 @@ def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax
         return [x, [indices, margins_of_error]]
     else:
         return x
-
-
-def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
-    """
-    TODO: pas besoin de passer par le calcul direct de l'inverse du préconditionneur.
-    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement
-    SSOR.
-    :param A: matrice carrée symétrique définie positive
-    :param b: second membre
-    :param eps: précision
-    :param kmax: entier correspondant au nombre maximal de tours de boucle
-    :param w: paramètrage SSOR
-    :param debug:
-    :param convergence:
-    Si ce paramètre vaut True, la fonction retourne la solution ET les informations permettant
-    d'étudier la convergence de la méthode, à savoir :
-        - une liste contenant les indices de chaque étape (tours de boucle
-        - une liste contenant || Ax_k - b ||, où x_k est l'approximation de la solution du système linéaire à la k-ème
-        étape. Plus cette valeur est proche de 0, plus x_k est proche de la solution exacte.
-    :return x: solution du système linéaire avec conditions aux bords
-    :return:
-    """
-    # Initialisation des variables nécessaires pour calculer l'inverse du préconditionneur
-    n = np.shape(A)[0]
-    D = get_diagonal(A)
-    DM12 = np.zeros((n, n))
-
-    for i in range(n):
-        DM12[i, i] = 1 / sqrt(D[i, i])
-
-    E = - get_lower_strict(A)
-    T = (1 / sqrt(w * (2 - w))) * (D - w * E) * DM12
-    T_inv = inv_lower_triangular(T)
-    T_transpose_inv = np.linalg.inv(np.transpose(T))
-
-    # Calcul de l'inverse du préconditionneur
-    prec = np.matmul(T_transpose_inv, T_inv)
-
-    # Résolution du système : P^-1 * A *x = P^-1 * b
-    return conjugate_gradient_method(np.matmul(prec, A), np.matmul(prec, b), eps, kmax, debug, convergence)

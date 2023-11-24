@@ -68,7 +68,7 @@ def compare_convergence_ssor_w(A: np.array, b: np.array, params: list[float]) ->
     :return:
     """
     for w in params:
-        indices, margins_of_error = functions.conjugate_gradient_method_ssor_v2(A, b, 1e-5, 100, w, False, True)[1]
+        indices, margins_of_error = functions.conjugate_gradient_method_ssor(A, b, 1e-5, 100, w, False, True)[1]
         plt.plot(indices, margins_of_error, ls="-", marker=".", label="w = " + str(w))
 
     plt.grid(True)
@@ -92,7 +92,7 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bo
     :return:
     """
     indices, margins_of_error = functions.conjugate_gradient_method(A, b, eps, kmax, debug, True)[1]
-    indices_ssor, margins_of_error_ssor = functions.conjugate_gradient_method_ssor_v2(A, b, eps, kmax, 1, debug, True)[1]
+    indices_ssor, margins_of_error_ssor = functions.conjugate_gradient_method_ssor(A, b, eps, kmax, 1, debug, True)[1]
 
     if debug:
         print("")
