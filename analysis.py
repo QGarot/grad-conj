@@ -80,6 +80,17 @@ def compare_convergence_ssor_w(A: np.array, b: np.array, params: list[float]) ->
     plt.show()
 
 
+def compare_convergence_with_iters(A: np.array, b: np.array, params: list[float]) -> None:
+    iterations = []
+    for w in params:
+        iterations.append(len(functions.conjugate_gradient_method_ssor(A, b, 1e-6, 150, w, False, True)[1][0]))
+    fig, ax = plt.subplots()
+    ax.bar(params, iterations)
+    ax.set_ylabel("Nombre d'itérations")
+    ax.set_xlabel("$w$")
+    plt.show()
+
+
 def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bool, debug: bool = False) -> None:
     """
     Affiche sur un même graphique les convergences de la méthode du gradient conjugué SANS et AVEC préconditionnement

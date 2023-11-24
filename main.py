@@ -42,6 +42,8 @@ if __name__ == "__main__":
     # ----------------------------------------------------------------------------------------
     # 5. Comparaison de la convergence de la méthode du gradient conjugué en fonction du
     #    paramètre du préconditionneur SSOS (w)
-    params = [0.1, 0.6, 0.9, 1.2, 1.8, 1.99]
+    params = [0.6, 1, 1.5, 1.99]
     analysis.compare_convergence_ssor_w(A, b, params)
+    analysis.compare_convergence_with_iters(A, b, params)
+
 
