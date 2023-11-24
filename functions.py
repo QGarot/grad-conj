@@ -24,8 +24,8 @@ def display_function(u: np.array, debug: bool = False) -> None:
 
     if debug:
         print("-------  Affichage d'une solution  -------")
-        print(">> 'Longueur' de l'abscisse : ", len(x))
-        print(">> 'Longueur' de l'ordonnée : ", len(y))
+        print(">> 'Longueur' de l'abscisse :", len(x))
+        print(">> 'Longueur' de l'ordonnée :", len(y))
         print("------------------------------------------")
 
     # Affichage
@@ -69,10 +69,10 @@ def conjugate_gradient_method(A: np.array, b: np.array, eps: float, kmax: int, d
 
     if debug:
         print("----------- Gradient conjugué  -----------")
-        print(">> n = ", n)
-        print(">> x = \n", x)
-        print(">> r = \n", r)
-        print(">> p = \n", p)
+        print(">> n =", n)
+        print(">> x =\n", x)
+        print(">> r =\n", r)
+        print(">> p =\n", p)
         print("")
 
     for k in range(kmax):
@@ -93,16 +93,16 @@ def conjugate_gradient_method(A: np.array, b: np.array, eps: float, kmax: int, d
         p = r + beta * p
 
         if debug:
-            print("k = ", k)
-            print(">>  Distance à la solution = ", np.linalg.norm(np.matmul(A, x) - b))
+            print("k =", k)
+            print(">>  Distance à la solution =", np.linalg.norm(np.matmul(A, x) - b))
 
     # Vérification
     if debug:
         print("")
         print("Vérification :")
-        print(">> b = ", b)
-        print(">> Ax = ", np.matmul(A, x))
-        print(">> Distance finale à la solution = ", np.linalg.norm(np.matmul(A, x) - b))
+        print(">> b =", b)
+        print(">> Ax =", np.matmul(A, x))
+        print(">> Distance finale à la solution =", np.linalg.norm(np.matmul(A, x) - b))
         print("------------------------------------------")
 
     # Conditions aux bords
@@ -229,6 +229,30 @@ def inv_lower_triangular(T: np.array) -> np.array:
                 sum = sum + T[l, k] * TM1[k, c]
             TM1[l, c] = (1 / T[l, l]) * (kronecker(l, c) - sum)
     return TM1
+
+def solve_lower(L: np.array, b: np.array) -> np.array:
+    n = np.shape(L)[0]
+    x = np.zeros(n)
+
+    for i in range(n):
+        x[i] = b[i]
+        for j in range(i):
+            x[i] = x[i] - L[i,j]*x[j]
+        x[i] = x[i] / L[i,i]
+    
+    return x
+
+def solve_upper(U: np.array, b: np.array) -> np.array:
+    n = np.shape(U)[0]
+    x = np.zeros(n)
+
+    for i in range(n-1, -1, -1):
+        x[i] = b[i]
+        for j in range(i+1, n):
+            x[i] -= U[i, j]*x[j]
+        x[i] /= U[i, i]
+    
+    return x
 
 
 def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
