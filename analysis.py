@@ -16,7 +16,7 @@ def multi_display_dimensions(dimensions: list[int], k: int) -> None:
     """
     for dim in dimensions:
         A, b = functions.define_linear_system(dim, k)
-        x = functions.conjugate_gradient_method(A, b, 0.0001, 50)
+        x = functions.conjugate_gradient_method(A, b, 1e-9, 50)
 
         nb_points = len(x)
         delta = 1 / (nb_points - 1)
@@ -96,11 +96,11 @@ def compare_convergence(A: np.array, b: np.array, eps: float, kmax: int, log: bo
 
     if debug:
         print("")
-        print(">> indices = ", indices)
-        print(">> margins_of_error = ", margins_of_error)
+        print(">> indices =", indices)
+        print(">> margins_of_error =", margins_of_error)
         print("")
-        print(">> indices_ssor = ", indices_ssor)
-        print(">> margins_of_error_ssor = ", margins_of_error_ssor)
+        print(">> indices_ssor =", indices_ssor)
+        print(">> margins_of_error_ssor =", margins_of_error_ssor)
 
     if log:
         plt.plot(indices, np.log10(margins_of_error), ls="-", marker=".", label="Sans SSOR")
