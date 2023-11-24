@@ -255,6 +255,107 @@ def solve_upper(U: np.array, b: np.array) -> np.array:
     return x
 
 
+def conjugate_gradient_method_ssor_v2(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
+    """
+    Retourne la solution du système linéaire Ax = b en utilisant la méthode du gradient conjugué avec préconditionnement SSOR
+    Utilité de l'usage d'une boucle inconditionnelle : étudier la vitesse de convergence de la méthode.
+    :param A: matrice carrée symétrique définie positive
+    :param b: second membre
+    :param eps: précision
+    :param kmax: entier correspondant au nombre maximal de tour de boucle à effectuer
+    :param debug:
+    :param convergence:
+    Si ce paramètre vaut True, la fonction retourne la solution ET les informations permettant
+    d'étudier la convergence de la méthode, à savoir :
+        - une liste contenant les indices de chaque étape (tours de boucle
+        - une liste contenant || Ax_k - b ||, où x_k est l'approximation de la solution du système linéaire à la k-ème
+        étape. Plus cette valeur est proche de 0, plus x_k est proche de la solution exacte.
+    :return x: solution du système linéaire avec conditions aux bords
+    """
+    n = np.shape(A)[0]
+
+    # Initialisation
+    x = np.zeros(n)
+    r = b - np.matmul(A, x)
+
+    # Modification pour SSOR
+    D = get_diagonal(A)
+    DM12 = np.zeros((n, n))
+
+    for i in range(n):
+        DM12[i, i] = 1 / sqrt(D[i, i])
+
+    E = - get_lower_strict(A)
+    T = (1 / sqrt(w * (2 - w))) * np.matmul((D - w * E), DM12)
+    T_transpose = np.transpose(T)
+
+    y = solve_lower(T, r)
+    p = solve_upper(T_transpose, y)
+
+    z = p
+
+    # Initialisation des paramètres pour étudier la convergence
+    # liste des indices
+    indices = []
+    # liste des marges d'erreur, c'est à dire des || Ax_k - b ||
+    margins_of_error = []
+
+    if debug:
+        print("----------- Gradient conjugué  -----------")
+        print(">> n =", n)
+        print(">> x =\n", x)
+        print(">> r =\n", r)
+        print(">> p =\n", p)
+        print("")
+
+    for k in range(kmax):
+        alpha = np.matmul(np.transpose(r), z) / np.matmul(np.matmul(np.transpose(p), A), p)
+        x = x + alpha * p
+        rk = r
+        r = rk - alpha * np.matmul(A, p)
+        res = np.linalg.norm(np.matmul(A, x) - b)
+
+        if convergence:
+            indices.append(k)
+            margins_of_error.append(res)
+
+        if np.linalg.norm(r) <= eps:
+            break
+
+        
+        # Modification pour SSOR
+        zk = z
+        y = solve_lower(T, r)
+        z = solve_upper(T_transpose, y)
+
+        beta = np.matmul(np.transpose(r), z) / np.matmul(np.transpose(rk), zk)
+        p = z + beta * p
+
+        if debug:
+            print("k =", k)
+            print(">>  Distance à la solution =", np.linalg.norm(np.matmul(A, x) - b))
+
+    # Vérification
+    if debug:
+        print("")
+        print("Vérification :")
+        print(">> b =", b)
+        print(">> Ax =", np.matmul(A, x))
+        print(">> Distance finale à la solution =", np.linalg.norm(np.matmul(A, x) - b))
+        print("------------------------------------------")
+
+    # Conditions aux bords
+    x = np.insert(x, 0, 1)
+    x = np.append(x, 0.0)
+
+    # Si on veut étudier la convergence, on retourne les données nécessaires pour afficher le graphe de || Ax_k - b ||
+    # en fonction de k
+    if convergence:
+        return [x, [indices, margins_of_error]]
+    else:
+        return x
+
+
 def conjugate_gradient_method_ssor(A: np.array, b: np.array, eps: float, kmax: int, w: float, debug: bool = False, convergence: bool = False) -> Union[np.array, list[np.array, list]]:
     """
     TODO: pas besoin de passer par le calcul direct de l'inverse du préconditionneur.
