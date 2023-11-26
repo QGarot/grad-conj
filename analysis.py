@@ -1,6 +1,7 @@
 import functions
 import matplotlib.pyplot as plt
 import numpy as np
+from typing import Union
 
 
 def multi_display_dimensions(dimensions: list[int], k: int) -> None:
@@ -43,7 +44,7 @@ def multi_display_k(params: list[int], n: int) -> None:
     """
     for k in params:
         A, b = functions.define_linear_system(n, k)
-        x = functions.conjugate_gradient_method(A, b, 1e-9, 100)
+        x = functions.conjugate_gradient_method(A, b, 1e-9, 500)
 
         nb_points = len(x)
         delta = 1 / (nb_points - 1)
@@ -60,15 +61,16 @@ def multi_display_k(params: list[int], n: int) -> None:
 
 def compare_convergence_ssor_w(A: np.array, b: np.array, params: list[float]) -> None:
     """
-    Affiche sur un même graphique les convergences de la méthode du gradient conjugué préconditionné (SSOR) en fonction
+    Affiche sur un même graphique la convergence de la méthode du gradient conjugué préconditionné (SSOR) en fonction
     de son paramètre w. Tests effectués avec une bonne précision.
     :param A: matrice carrée symétrique définie positive
     :param b: second membre
     :param params: liste contenant les paramètres w à tester
     :return:
     """
+    nb_max_iter = 150
     for w in params:
-        indices, margins_of_error = functions.conjugate_gradient_method_ssor(A, b, 1e-5, 100, w, False, True)[1]
+        indices, margins_of_error = functions.conjugate_gradient_method_ssor(A, b, 1e-6, nb_max_iter, w, False, True)[1]
         plt.plot(indices, margins_of_error, ls="-", marker=".", label="w = " + str(w))
 
     plt.grid(True)
@@ -80,14 +82,27 @@ def compare_convergence_ssor_w(A: np.array, b: np.array, params: list[float]) ->
     plt.show()
 
 
-def compare_convergence_with_iters(A: np.array, b: np.array, params: list[float]) -> None:
+def compare_convergence_with_iters(A: np.array, b: np.array, params: Union[list[float], np.ndarray]) -> None:
+    """
+    Affiche le graphique représentant le nombre d'itérations de la méthode du gradient conjugué préconditionné en
+    fonction du paramètre w du préconditionneur SSOR.
+    :param A:
+    :param b:
+    :param params:
+    :return:
+    """
     iterations = []
     for w in params:
-        iterations.append(len(functions.conjugate_gradient_method_ssor(A, b, 1e-6, 150, w, False, True)[1][0]))
-    fig, ax = plt.subplots()
-    ax.bar(params, iterations)
-    ax.set_ylabel("Nombre d'itérations")
-    ax.set_xlabel("$w$")
+        # Données pour étudier la convergence (cf. documentation de la fonction 'conjugate_gradient_method_ssor')
+        conv_data = functions.conjugate_gradient_method_ssor(A, b, 1e-7, 500, w, False, True)[1]
+        # Nombre d'itérations nécessaires à la résolution du système
+        nb_iter = len(conv_data[0])
+        iterations.append(nb_iter)
+
+    plt.grid(True)
+    plt.plot(params, iterations, ls="-", marker=".")
+    plt.xlabel("$w$")
+    plt.ylabel("Nombre d'itérations")
     plt.show()
 
 
