@@ -1,7 +1,7 @@
 ## Gradient conjugué et préconditionnement
 
-Rapport : [report.pdf](https://github.com/QGarot/grad-conj/tree/master/files/report/report.pdf)
+Consulter le [rapport](https://github.com/QGarot/grad-conj/tree/master/files/report/report.pdf) pour plus de détails.
 
 ### Crédits
-Q. GAROT, R. KAYA
+Q. Garot, R. Kaya
 
